@@ -32,6 +32,8 @@
   $('help-back').addEventListener('click', function () { showTab(prev); });
   $('sos-btn').addEventListener('click', function () { showTab('emergency'); });
   $('em-back').addEventListener('click', function () { showTab(prev); });
+  // 緊急画面を開いたまま、ロックしたり、別のアプリに切り替えたりしたら、前の画面に戻す(ポケットの中での、押し間違いを減らす)
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && tab === 'emergency') showTab(prev); });
   window.addEventListener('yama:header', header);
 
   // ---- コース一覧

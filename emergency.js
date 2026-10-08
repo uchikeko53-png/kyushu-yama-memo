@@ -71,7 +71,7 @@
       if (l) { cur = { lat: l[0], lon: l[1], acc: l[2] || 30, alt: null, t: Date.now() - 1, stale: true }; enrich(cur, my); $('em-msg').textContent = '新しい位置を取得できませんでした。覚えていた位置を表示しています。'; }
       else { box.innerHTML = '<p class="small">位置を取得できませんでした。空の開けた場所で「もう一度調べる」を押してください。位置情報の許可も確認してください。</p>'; }
     }
-    if (!navigator.geolocation) { fromLast(); return; }
+    if (!navigator.geolocation || typeof navigator.geolocation.getCurrentPosition !== 'function') { fromLast(); return; }
     navigator.geolocation.getCurrentPosition(function (pos) {
       if (my !== seq) return;
       cur = { lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy, alt: pos.coords.altitude, t: pos.timestamp || Date.now(), stale: false };
