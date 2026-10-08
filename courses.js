@@ -21,6 +21,7 @@
       min: Math.round(min / 5) * 5                     // 全体の目安 分
     };
   }
+  window.courseStats = stats;
   var META = [
     { id: 'ichinomine-ninomine', name: '一ノ峯・二ノ峯', area: '熊本県 阿蘇外輪山の麓' },
     { id: 'kusasenri-eboshidake', name: '草千里〜烏帽子岳', area: '熊本県 阿蘇 草千里',
@@ -30,9 +31,26 @@
     { id: 'jiromaru', name: '次郎丸嶽', area: '熊本県 天草上島',
       note: '下書きでは、駐車場から登山道の入口まで約0.8kmが車道です。太郎丸嶽とは別のコースとして登録しています。' }
   ];
+  // ---- 自分で登録したコース(この端末の中に保存)。仮登録のものは provisional: true
+  var CKEY = 'yama-custom-courses';
+  function cload() { try { var a = JSON.parse(localStorage.getItem(CKEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function csave(a) { try { localStorage.setItem(CKEY, JSON.stringify(a)); return true; } catch (e) { return false; } }
+  window.Custom = {
+    list: cload, replaceAll: csave,
+    add: function (c) { var a = cload(); a.push(c); return csave(a); },
+    update: function (id, patch) { var a = cload(); a.forEach(function (c) { if (c.id === id) Object.assign(c, patch); }); return csave(a); },
+    remove: function (id) { return csave(cload().filter(function (c) { return c.id !== id; })); }
+  };
+  cload().forEach(function (c) {
+    var r = c && c.route;
+    if (!c || !c.id || !r || !Array.isArray(r.points) || r.points.length < 2 || !Array.isArray(r.line) || r.line.length < 2 || !Array.isArray(r.marks) || !(r.total > 0)) return;
+    if (window.ROUTES[c.id]) return; // 標準のコースと、IDが重なったものは使わない
+    window.ROUTES[c.id] = r;
+    META.push({ id: c.id, name: String(c.name || 'コース'), area: String(c.area || ''), note: String(c.note || ''), custom: true, provisional: !!c.provisional });
+  });
   window.COURSES = META.filter(function (m) { return window.ROUTES[m.id]; }).map(function (m) {
     var r = window.ROUTES[m.id];
-    return { id: m.id, name: m.name, area: m.area, note: m.note || '', kind: r.type === 'loop' ? '周回' : '往復', route: r, stats: stats(r) };
+    return { id: m.id, name: m.name, area: m.area, note: m.note || '', custom: !!m.custom, provisional: !!m.provisional, kind: r.type === 'loop' ? '周回' : '往復', route: r, stats: stats(r) };
   });
   window.courseById = function (id) { return window.COURSES.filter(function (c) { return c.id === id; })[0] || null; };
   window.fmtMin = function (m) { return m < 60 ? m + '分' : Math.floor(m / 60) + '時間' + (m % 60 ? m % 60 + '分' : ''); };

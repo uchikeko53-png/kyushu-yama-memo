@@ -52,7 +52,7 @@
       lcum.push(lcum[q - 1] + Math.hypot(w[0] - u[0], w[1] - u[1]));
     }
     // 画面の文字
-    $('h-eyebrow').dataset.course = course.area + ' ・ ' + course.kind + 'コース';
+    $('h-eyebrow').dataset.course = course.area + ' ・ ' + course.kind + 'コース' + (course.provisional ? ' ・ 仮のコース' : '');
     $('h-title').dataset.course = course.name;
     $('map').setAttribute('aria-label', course.name + 'の地図');
     var S = course.stats, loop = course.kind === '周回';

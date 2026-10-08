@@ -33,6 +33,9 @@
 
   <div id="v-courses">
     <section class="panel">
+      <div class="row newrow">
+        <button type="button" class="btn" id="nc-open">＋ 新しいコースを仮登録</button>
+      </div>
       <div class="filters" role="group" aria-label="絞り込み">
         <button type="button" data-f="all" aria-pressed="true">すべて</button>
         <button type="button" data-f="planned" aria-pressed="false">計画中</button>
@@ -40,6 +43,11 @@
         <button type="button" data-f="done" aria-pressed="false">登った</button>
       </div>
       <div id="cs-list" class="cslist"></div>
+      <div class="row cio">
+        <button type="button" class="mini" id="cio-export">仮のコースを書き出し</button>
+        <label class="mini">仮のコースを読み込み<input type="file" id="cio-import" accept="application/json,.json" hidden></label>
+      </div>
+      <p class="small" id="cio-msg" aria-live="polite" style="margin:6px 0 0"></p>
       <p class="small">コースの線は OpenStreetMap のデータから作った下書きです。現地の標識と公的な情報で必ず確認してください。予定と状態は、この端末に保存されます。</p>
     </section>
   </div>
@@ -56,6 +64,7 @@
           <li>ホーム画面に追加すると、アプリのように使えて、記録も消えにくくなります。
             <br>iPhone: Safari または Chrome で開いて、共有ボタン(またはメニュー) → 「ホーム画面に追加」。
             <br>Android: Chrome で開いて、メニュー → 「ホーム画面に追加」または「アプリをインストール」。</li>
+          <li>行きたい山が一覧にないときは、「コース」タブの「新しいコースを仮登録」で、自分でつくれます(通信が必要です)。つくったコースは「仮」の印が付き、あなたのスマホの中にだけ保存されます。ルートは自動で作った下書きなので、必ず現地で確かめてください。</li>
           <li>画面の下のタブで切り替えます。<b>コース</b>(山の一覧)、<b>計画</b>(天気・持ち物)、<b>地図</b>(現在地)、<b>記録</b>(写真と文章)。</li>
         </ul>
       </details>
@@ -189,6 +198,7 @@
     </section>
   </div>
 
+  <div id="v-newcourse" hidden></div>
   <div id="v-plan" hidden></div>
   <div id="v-sheet" hidden></div>
 
@@ -301,6 +311,8 @@
 <script src="track.js"></script>
 <script src="log.js"></script>
 <script src="plan.js"></script>
+<script src="routing.js"></script>
+<script src="newcourse.js"></script>
 <script src="sheet.js"></script>
 <script src="munis.js"></script>
 <script src="emergency.js"></script>

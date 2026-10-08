@@ -2,23 +2,23 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var VIEWS = { courses: 'v-courses', plan: 'v-plan', map: 'v-map', log: 'v-log', help: 'v-help', emergency: 'v-emergency', sheet: 'v-sheet' };
+  var VIEWS = { courses: 'v-courses', plan: 'v-plan', map: 'v-map', log: 'v-log', help: 'v-help', emergency: 'v-emergency', sheet: 'v-sheet', newcourse: 'v-newcourse' };
   var tab = 'courses', filter = 'all', prev = 'courses';
 
   function header() {
     var map = tab === 'map';
-    $('h-eyebrow').textContent = map ? $('h-eyebrow').dataset.course : (tab === 'sheet' ? '出発前の準備' : tab === 'emergency' ? '緊急時' : tab === 'help' ? 'はじめに' : (tab === 'log' ? '登った記録' : (tab === 'plan' ? '出発前の準備' : '計画と記録')));
-    $('h-title').textContent = map ? $('h-title').dataset.course : (tab === 'sheet' ? '登山計画書' : tab === 'emergency' ? '現在地と連絡' : tab === 'help' ? '使い方と注意点' : '九州 山歩きメモ');
+    $('h-eyebrow').textContent = map ? $('h-eyebrow').dataset.course : (tab === 'newcourse' ? '仮登録' : tab === 'sheet' ? '出発前の準備' : tab === 'emergency' ? '緊急時' : tab === 'help' ? 'はじめに' : (tab === 'log' ? '登った記録' : (tab === 'plan' ? '出発前の準備' : '計画と記録')));
+    $('h-title').textContent = map ? $('h-title').dataset.course : (tab === 'newcourse' ? '新しいコース' : tab === 'sheet' ? '登山計画書' : tab === 'emergency' ? '現在地と連絡' : tab === 'help' ? '使い方と注意点' : '九州 山歩きメモ');
     document.querySelector('.layers').hidden = !map;
     $('help-btn').hidden = tab === 'help' || tab === 'emergency';
     $('sos-btn').hidden = tab === 'emergency';
   }
   function showTab(name) {
-    if (name !== 'help' && name !== 'emergency' && name !== 'sheet') prev = name;
+    if (name !== 'help' && name !== 'emergency' && name !== 'sheet' && name !== 'newcourse') prev = name;
     tab = name;
     Object.keys(VIEWS).forEach(function (k) {
       $(VIEWS[k]).hidden = k !== name;
-      if ($('tab-' + k)) $('tab-' + k).setAttribute('aria-selected', k === name || (name === 'sheet' && k === 'plan'));
+      if ($('tab-' + k)) $('tab-' + k).setAttribute('aria-selected', k === name || (name === 'sheet' && k === 'plan') || (name === 'newcourse' && k === 'courses'));
     });
     header();
     if (name === 'map' && window.yamaMap) { setTimeout(function () { window.yamaMap.invalidateSize(); $('fit').click(); }, 0); }
@@ -81,6 +81,7 @@
     rows.forEach(function (x) {
       var c = x.c, el = document.createElement('article'); el.className = 'course';
       var chips = '';
+      if (c.provisional) chips += '<span class="chip plan">仮のコース</span>';
       if (x.plan && x.plan.status === 'planned') chips += '<span class="chip plan">計画中' + (x.plan.date ? ' ' + fmtDate(x.plan.date) : '') + '</span>';
       if (x.plan && x.plan.status === 'idea') chips += '<span class="chip plan">気になる</span>';
       if (x.n) chips += '<span class="chip ok">登った ' + x.n + '回(前回 ' + fmtFull(x.last) + ')</span>';
@@ -101,6 +102,16 @@
       }
       sel.addEventListener('change', function () { save(); draw(); });
       di.addEventListener('change', function () { save(); draw(); });
+      if (c.custom) {
+        var act = document.createElement('div'); act.className = 'row'; el.appendChild(act);
+        function mini(t, cls, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'mini' + (cls ? ' ' + cls : ''); b.textContent = t; b.addEventListener('click', fn); act.appendChild(b); return b; }
+        if (c.provisional) mini('仮を外す(確定)', '', function () { window.Custom.update(c.id, { provisional: false, note: '' }); location.reload(); });
+        mini('名前を直す', '', function () { var nm = window.prompt('コース名', c.name); if (nm && nm.trim()) { window.Custom.update(c.id, { name: nm.trim() }); location.reload(); } });
+        var del = mini('削除', 'danger', function () {
+          if (del.dataset.ok) { window.Custom.remove(c.id); try { if (localStorage.getItem('yama-course') === c.id) localStorage.removeItem('yama-course'); } catch (e) {} location.reload(); return; }
+          del.dataset.ok = '1'; del.textContent = 'もう一度押すと削除'; setTimeout(function () { delete del.dataset.ok; del.textContent = '削除'; }, 4000);
+        });
+      }
       el.querySelector('.mb').addEventListener('click', function () { window.Yama.select(c.id); showTab('map'); });
       el.querySelector('.pb').addEventListener('click', function () { window.Yama.select(c.id); showTab('plan'); });
       box.appendChild(el);
@@ -114,6 +125,17 @@
     });
   });
   window.addEventListener('yama:records', renderCourses);
+  $('nc-open').addEventListener('click', function () { showTab('newcourse'); });
+  $('cio-export').addEventListener('click', function () { var n = window.CourseIO.exportCourses(); $('cio-msg').textContent = n ? n + '件の仮のコースを、書き出しました。' : '書き出す、自分で登録したコースがありません。'; });
+  $('cio-import').addEventListener('change', function () {
+    var f = this.files[0], inp = this; if (!f) return;
+    window.CourseIO.importCourses(f, function (n) {
+      inp.value = '';
+      if (n < 0) $('cio-msg').textContent = 'このファイルは読み込めませんでした。このアプリで書き出したファイルを選んでください。';
+      else if (n === 0) $('cio-msg').textContent = '新しく追加できるコースが、ありませんでした(すでに入っているか、中身が空です)。';
+      else { $('cio-msg').textContent = n + '件を読み込みました。画面を更新します…'; setTimeout(function () { location.reload(); }, 800); }
+    });
+  });
 
   showTab('courses');
 })();

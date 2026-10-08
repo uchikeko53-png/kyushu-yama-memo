@@ -204,3 +204,17 @@ header{position:relative}
   #sheet-doc{position:absolute;left:0;top:0;width:100%;border:0}
   header,.tabs{display:none}
 }
+
+/* 新しいコース */
+.newrow{margin-bottom:12px}
+.cio{margin-top:6px}
+.nc .modes button[aria-pressed="true"]{background:var(--forest);color:var(--forest-ink);border-color:var(--forest);font-weight:700}
+.nc .ncmap{height:50vh;min-height:300px;margin:8px 0;border-radius:12px}
+.nc .ncmap #nc-map{border-radius:12px}
+.nc input,.nc select{font:inherit;color:var(--ink);border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.nc .row{margin-top:8px}
+.nc .grow{flex:1;min-width:0;width:auto}
+.nc h2{margin:20px 0 8px}
+.nc .status.ok{border-color:var(--ok)}
+.nc .row .btn{flex:1}
+#nc-map{position:absolute;inset:0;background:#e9e7da}
