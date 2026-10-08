@@ -30,7 +30,29 @@
   Object.keys(VIEWS).forEach(function (k) { if ($('tab-' + k)) $('tab-' + k).addEventListener('click', function () { showTab(k); }); });
   $('help-btn').addEventListener('click', function () { showTab('help'); });
   $('help-back').addEventListener('click', function () { showTab(prev); });
-  $('sos-btn').addEventListener('click', function () { showTab('emergency'); });
+  // 緊急ボタンは、ポケットの中での押し間違いを防ぐため、長押し(約0.8秒)で開く。短く触れたときは、長押しの案内を出す
+  var HOLD_MS = 800, holdT = null, hintT = null, sos = $('sos-btn');
+  function hint(msg) {
+    var e = $('sos-hint'); e.textContent = msg; e.hidden = false;
+    clearTimeout(hintT); hintT = setTimeout(function () { e.hidden = true; }, 3500);
+  }
+  function holdStart(ev) {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    if (holdT) return;
+    sos.classList.add('holding'); hint('そのまま押し続けると、ひらきます');
+    holdT = setTimeout(function () {
+      holdT = null; sos.classList.remove('holding'); $('sos-hint').hidden = true; showTab('emergency');
+    }, HOLD_MS);
+  }
+  function holdCancel() {
+    if (!holdT) return;
+    clearTimeout(holdT); holdT = null; sos.classList.remove('holding'); hint('長押しでひらきます(約1秒、押し続けてください)');
+  }
+  sos.addEventListener('pointerdown', holdStart);
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (t) { sos.addEventListener(t, holdCancel); });
+  sos.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  // キーボードや、読み上げ機能からの操作(画面に触れない操作)は、そのまま開く
+  sos.addEventListener('click', function (e) { if (e.detail === 0) showTab('emergency'); });
   $('em-back').addEventListener('click', function () { showTab(prev); });
   // 緊急画面を開いたまま、ロックしたり、別のアプリに切り替えたりしたら、前の画面に戻す(ポケットの中での、押し間違いを減らす)
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden' && tab === 'emergency') showTab(prev); });

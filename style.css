@@ -176,3 +176,12 @@ a.mini{text-decoration:none;display:inline-block}
 
 .sos .row{margin-top:8px}
 .sos .callbox .row{margin-top:0}
+
+/* 緊急ボタンの長押し */
+header{position:relative}
+.sosbtn{position:relative;overflow:hidden;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.sosbtn::after{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.45)}
+.sosbtn.holding::after{width:100%;transition:width .8s linear}
+.soshint{position:absolute;right:16px;top:calc(100% - 6px);z-index:900;background:#26302a;color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;max-width:calc(100% - 32px);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.soshint[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.sosbtn.holding::after{transition:none}}
