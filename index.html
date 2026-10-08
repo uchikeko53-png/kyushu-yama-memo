@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>九州 山歩きメモ</title>
+<link rel="stylesheet" href="lib/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <div class="eyebrow" id="h-eyebrow">計画と記録</div>
+      <h1 id="h-title">九州 山歩きメモ</h1>
+    </div>
+    <div class="layers" role="group" aria-label="地図の種類">
+      <button type="button" data-layer="std" aria-pressed="true">標準</button>
+      <button type="button" data-layer="photo" aria-pressed="false">写真</button>
+      <button type="button" data-layer="relief" aria-pressed="false">色別標高</button>
+    </div>
+  </header>
+
+  <div id="v-courses">
+    <section class="panel">
+      <div class="filters" role="group" aria-label="絞り込み">
+        <button type="button" data-f="all" aria-pressed="true">すべて</button>
+        <button type="button" data-f="planned" aria-pressed="false">計画中</button>
+        <button type="button" data-f="idea" aria-pressed="false">気になる</button>
+        <button type="button" data-f="done" aria-pressed="false">登った</button>
+      </div>
+      <div id="cs-list" class="cslist"></div>
+      <p class="small">コースの線は OpenStreetMap のデータから作った下書きです。現地の標識と公的な情報で必ず確認してください。予定と状態は、この端末に保存されます。</p>
+    </section>
+  </div>
+
+  <div id="v-plan" hidden></div>
+
+  <div id="v-map" hidden>
+  <div class="mapbox">
+    <div id="map" aria-label="地図"></div>
+    <button type="button" id="locate" class="fab">現在地</button>
+    <button type="button" id="fit" class="fab fab2">ルート全体</button>
+  </div>
+
+  <section class="panel">
+    <div class="status" id="status" aria-live="polite">「現在地」を押すと、地図に自分の位置が出ます。</div>
+
+    <div class="stats">
+      <div><b id="s-dist">-</b><span id="s-dist-l">往復の距離</span></div>
+      <div><b id="s-elev">-</b><span id="s-elev-l">標高</span></div>
+      <div><b id="s-up">-</b><span id="s-up-l">片道の登り</span></div>
+      <div><b id="s-time">-</b><span id="s-time-l">往復の目安</span></div>
+    </div>
+
+    <h2 id="prof-title">標高の断面</h2>
+    <svg id="profile" viewBox="0 0 400 140" role="img" aria-label="標高の断面"></svg>
+
+    <h2>歩いた軌跡を記録</h2>
+    <div class="offline-box" id="trk-box">
+      <p class="small">歩いた道をGPSで記録します。画面をつけたままにしてください(消えると記録が途切れます)。迷った道も含まれるため、軌跡でルートの線を自動的に変えることはしません。</p>
+      <div id="trk-resume" class="warnbox" hidden></div>
+      <div id="trk-live" class="small" aria-live="polite"></div>
+      <button type="button" id="trk-btn" class="btn">軌跡の記録を始める</button>
+      <div id="trk-list" class="trklist"></div>
+    </div>
+
+    <h2 id="off-title">地図を端末に保存(圏外用)</h2>
+    <div class="offline-box">
+      <div class="row"><span id="off-badge" class="chip">未保存</span><span id="off-net" class="small"></span></div>
+      <p class="small" id="off-est"></p>
+      <label class="small"><input type="checkbox" id="off-photo"> 空中写真も保存する(容量が増えます)</label>
+      <div class="bar" aria-hidden="true"><i id="off-bar"></i></div>
+      <button type="button" id="off-save" class="btn">この範囲の地図を保存</button>
+      <p class="small" id="off-msg" aria-live="polite">出発前に、Wi-Fi につないだ状態で保存してください。</p>
+      <p class="small" id="off-used"></p>
+      <button type="button" id="off-del" class="btn ghost" hidden>保存した地図を削除</button>
+    </div>
+
+    <details>
+      <summary>PCで試す: 位置を仮に動かす</summary>
+      <label class="sim">登山口から <output id="sim-out">0</output> m
+        <input type="range" id="sim" min="0" max="100" value="0" aria-label="仮の現在地">
+      </label>
+    </details>
+
+    <p class="note">
+      登山道の線は OpenStreetMap のデータから作成した下書きで、現地では未確認です。
+      実際の登山道、通行止め、分岐は必ず現地の標識や公的な情報で確認してください。
+      山では紙の地図、予備バッテリー、防寒具も持参してください。
+    </p>
+    <p class="credit">地図: <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院タイル</a> / 登山道: &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> / 標高: 国土地理院 標高API</p>
+  </section>
+  </div>
+
+  <div id="v-log" hidden>
+    <section class="panel">
+      <form id="log-form" class="logform">
+        <h2 id="lf-title" style="margin:0">山行を記録する</h2>
+        <div class="two">
+          <label>日付<input type="date" id="lf-date" required></label>
+          <label>書いた人<input type="text" id="lf-who" maxlength="20" placeholder="名前" required></label>
+        </div>
+        <label>コース<select id="lf-course"></select></label>
+        <div id="lf-stat" class="statbox" aria-live="polite"></div>
+        <label>山名<input type="text" id="lf-mt" maxlength="40" required></label>
+        <label>歩いた軌跡(任意)<select id="lf-track"><option value="">添付しない</option></select></label>
+        <label>ひとこと<textarea id="lf-text" maxlength="1000" placeholder="天気、きつかった所、よかった景色など" required></textarea></label>
+        <label>写真(3枚まで)<input type="file" id="lf-photos" accept="image/*" multiple></label>
+        <div id="lf-prev" class="prev"></div>
+        <div class="row">
+          <button class="btn" type="submit" id="lf-submit">記録を保存</button>
+          <button class="btn ghost" type="button" id="lf-cancel" hidden>編集をやめる</button>
+        </div>
+        <p class="small" id="lf-msg" aria-live="polite"></p>
+      </form>
+
+      <div class="row" style="justify-content:space-between;margin-top:6px">
+        <h2 style="margin:0">これまでの記録 <span class="small" id="lg-count"></span></h2>
+        <div class="row">
+          <button type="button" class="mini" id="lg-export">書き出し</button>
+          <label class="mini">読み込み<input type="file" id="lg-import" accept="application/json,.json" hidden></label>
+        </div>
+      </div>
+      <p class="small" id="lg-msg" aria-live="polite" style="margin:0"></p>
+      <div id="lg-list" class="loglist"></div>
+      <p class="small">記録はこの端末のブラウザに保存されています。友人と交換するには「書き出し」で作ったファイルを送り、相手が「読み込み」を使います。</p>
+    </section>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="画面の切り替え">
+    <button type="button" role="tab" id="tab-courses" aria-selected="true">コース</button>
+    <button type="button" role="tab" id="tab-plan" aria-selected="false">計画</button>
+    <button type="button" role="tab" id="tab-map" aria-selected="false">地図</button>
+    <button type="button" role="tab" id="tab-log" aria-selected="false">記録</button>
+  </nav>
+
+  <div id="lightbox" hidden><img alt=""><button type="button" class="btn ghost" id="lb-close">閉じる</button></div>
+</div>
+
+<script src="lib/leaflet.min.js"></script>
+<script src="routes.js"></script>
+<script src="courses.js"></script>
+<script src="app.js"></script>
+<script src="offline.js"></script>
+<script src="db.js"></script>
+<script src="track.js"></script>
+<script src="log.js"></script>
+<script src="plan.js"></script>
+<script src="nav.js"></script>
+</body>
+</html>
