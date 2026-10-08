@@ -148,3 +148,8 @@ summary{cursor:pointer;color:var(--mute)}
 .help ul{margin:0 0 12px;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
 .help ul.warn{border-left:4px solid var(--warn);padding-left:24px;background:color-mix(in srgb,var(--warn) 8%,transparent);padding-block:8px;margin-bottom:12px}
 #help-btn{white-space:nowrap}
+
+/* バックアップの案内 */
+.bk{border-left:4px solid var(--mute);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;display:flex;flex-direction:column;gap:8px;background:var(--paper)}
+.bk.warn{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}
+.bk.ok{border-color:var(--ok)}

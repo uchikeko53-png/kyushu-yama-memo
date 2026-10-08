@@ -77,6 +77,7 @@
       else if (!tid && !(editing && editing.walk && $('lf-track').dataset.keep)) { rec.trackId = ''; rec.walk = null; }
       return window.LogDB.put(rec);
     }).then(function () {
+      askPersist();
       $('lf-msg').textContent = editing ? '記録を更新しました。' : '記録を保存しました。';
       resetForm(); return render();
     }).catch(function () { $('lf-msg').textContent = '保存できませんでした。端末の空き容量やブラウザの設定を確認してください。'; });
@@ -84,10 +85,40 @@
 
   // ---- 一覧
   function fmt(d) { var p = d.split('-'); return p.length === 3 ? p[0] + '年' + +p[1] + '月' + +p[2] + '日' : d; }
+  // ---- バックアップの案内(最後に書き出した日と、それ以降に変えた記録の数)
+  var BK_KEY = 'yama-last-backup', WARN_DAYS = 30, persisted = null;
+  function lastBackup() { try { return +localStorage.getItem(BK_KEY) || 0; } catch (e) { return 0; } }
+  function askPersist() { // 端末のデータを消されにくくするよう、ブラウザに頼む(許可されるかはブラウザしだい)
+    if (!(navigator.storage && navigator.storage.persist)) return Promise.resolve();
+    return navigator.storage.persist().then(function (ok) { persisted = ok; }).catch(function () {});
+  }
+  function renderBackup(list) {
+    var box = $('bk'), last = lastBackup(), now = Date.now();
+    if (!list.length) { box.hidden = true; return; }
+    box.hidden = false;
+    var days = last ? Math.floor((now - last) / 86400000) : null;
+    var changed = list.filter(function (r) { return (r.updated || 0) > last; }).length;
+    var warn = !last || days >= WARN_DAYS;
+    var text = !last ? 'まだ書き出していません。スマホを変えたり、ブラウザのデータが消えたりすると、記録も消えます。'
+      : '最後の書き出し: ' + new Date(last).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' }) + '(' + (days === 0 ? '今日' : days + '日前') + ')。それ以降に追加・変更した記録: ' + changed + '件。';
+    if (last && changed === 0) warn = false;
+    box.className = 'bk ' + (warn ? 'warn' : 'ok');
+    box.innerHTML = '<div class="bkt"></div><div class="row"><button type="button" class="mini" id="bk-go">いま書き出す</button></div><div class="small" id="bk-p"></div>';
+    box.querySelector('.bkt').textContent = (warn ? 'バックアップをおすすめします。' : 'バックアップ済みです。') + text;
+    $('bk-go').addEventListener('click', function () { $('lg-export').click(); });
+    var p = $('bk-p');
+    if (navigator.storage && navigator.storage.persisted) {
+      navigator.storage.persisted().then(function (v) {
+        persisted = v || persisted;
+        p.textContent = persisted ? '端末に、データを保持するよう依頼ずみです(消えにくい設定)。' : '端末が、データを消すことがあります。ホーム画面のアイコンから使い、ときどき書き出してください。';
+      });
+    }
+  }
+
   function render() {
     urls.forEach(function (u) { URL.revokeObjectURL(u); }); urls = [];
     return window.LogDB.all().then(function (list) {
-      allRecs = list; courseChanged(true);
+      allRecs = list; courseChanged(true); renderBackup(list);
       var box = $('lg-list'); box.innerHTML = '';
       $('lg-count').textContent = list.length ? '(' + list.length + '件)' : '';
       if (!list.length) { box.innerHTML = '<p class="empty">まだ記録がありません。登ったら、上のフォームから書いてみましょう。</p>'; return; }
@@ -158,7 +189,8 @@
         var blob = new Blob([JSON.stringify({ app: 'yama-log', version: 1, records: out })], { type: 'application/json' });
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'yama-log-' + today() + '.json';
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-        $('lg-msg').textContent = list.length + '件を書き出しました。';
+        try { localStorage.setItem(BK_KEY, String(Date.now())); } catch (e) {}
+        $('lg-msg').textContent = list.length + '件を書き出しました。'; renderBackup(list);
       });
     });
   });
