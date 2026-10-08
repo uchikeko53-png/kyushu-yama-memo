@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1726"/><stop offset="1" stop-color="#27465f"/></linearGradient>
+<linearGradient id="o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a3d"/><stop offset="1" stop-color="#ffb347"/></linearGradient></defs>
+<rect width="512" height="512" fill="url(#s)"/>
+<circle cx="300" cy="238" r="118" fill="url(#o)"/>
+<polygon points="0,392 96,276 176,344 252,214 340,330 420,262 512,380 512,512 0,512" fill="#34556f"/>
+<polygon points="252,214 206,296 244,284 262,318 286,288 322,308 340,330" fill="#e9f2f8" opacity=".92"/>
+<polygon points="0,452 84,352 170,418 276,262 392,410 456,340 512,420 512,512 0,512" fill="#14263a"/>
+<polygon points="276,262 232,326 270,316 292,344 316,314 346,330 392,410" fill="#cfe0ec" opacity=".9"/>
+<polygon points="0,486 512,452 512,512 0,512" fill="#0a131f"/>
+<rect x="330" y="96" width="120" height="10" rx="5" fill="#ffb347" transform="rotate(-18 330 96)"/>
+</svg>
