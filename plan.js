@@ -112,11 +112,13 @@
       '<p class="small" style="margin:0">' + statLine(S) + '</p>' +
       '<h2>日の出・日没と、時間の目安</h2><div id="pl-sun"></div>' +
       '<h2>天気</h2><div id="pl-wx"><p class="small">読み込み中…</p></div>' +
-      '<h2>持ち物</h2><div id="pl-pack"></div>';
+      '<h2>持ち物</h2><div id="pl-pack"></div>' +
+      '<h2>登山計画書</h2><p class="small" style="margin:0 0 8px">この日付・出発時刻・持ち物から、家族や友人に伝えるための計画書をつくります。</p><button type="button" class="btn" id="pl-sheet">計画書をつくる・見る</button>';
     $('pl-course').addEventListener('change', function () { window.Yama.select(this.value); });
     $('pl-date').addEventListener('change', function () { if (this.value) { cur.date = this.value; render(); } });
     $('pl-start').addEventListener('change', function () { if (this.value) { cur.start = this.value; save(PREF_KEY, { start: cur.start }); renderSun(); } });
     renderSun(); renderPack(); renderWx();
+    $('pl-sheet').addEventListener('click', function () { window.showTab('sheet'); });
   }
   function renderSun() {
     var c = cur.c, p0 = c.route.points[0], sn = sun(cur.date, p0[0], p0[1]), S = c.stats, box = $('pl-sun');
@@ -175,4 +177,5 @@
   init();
   window.Yama.onCourse(function () { if (!root.hidden) render(); });
   window.addEventListener('yama:tab', function (e) { if (e.detail === 'plan') render(); });
+  window.PlanApi = { cur: cur, sun: sun, hm: hm, toMin: toMin, packItems: packItems, BEGINNER: BEGINNER, REST_MIN: REST_MIN, SAFETY_MIN: SAFETY_MIN };
 })();

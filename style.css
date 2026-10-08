@@ -185,3 +185,22 @@ header{position:relative}
 .soshint{position:absolute;right:16px;top:calc(100% - 6px);z-index:900;background:#26302a;color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;max-width:calc(100% - 32px);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .soshint[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.sosbtn.holding::after{transition:none}}
+
+/* 登山計画書 */
+.sheet .logform{margin-top:10px}
+.sheet textarea,.sheet input{font:inherit;color:var(--ink);border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.sheet .row{margin-top:10px}
+.doc{border:1px solid var(--ink);border-radius:4px;padding:14px;margin-top:16px;background:#fff;color:#1d221f}
+.doc .dt{text-align:center;font-size:20px;margin:0 0 6px;letter-spacing:.2em}
+.doc .ds{font-size:13px;margin:14px 0 4px;padding:2px 8px;background:#e8ece6;color:#1d221f}
+.doc .dl{margin:0;display:grid;grid-template-columns:8.5em 1fr;gap:0}
+.doc dt,.doc dd{margin:0;padding:5px 6px;border-bottom:1px solid #d7dbd3;font-size:13px;overflow-wrap:anywhere}
+.doc dt{color:#4a554d}
+.doc .warnrow{color:#9a4a00;font-weight:700}
+@media(max-width:420px){.doc .dl{grid-template-columns:6.5em 1fr}}
+@media print{
+  body *{visibility:hidden}
+  #sheet-doc,#sheet-doc *{visibility:visible}
+  #sheet-doc{position:absolute;left:0;top:0;width:100%;border:0}
+  header,.tabs{display:none}
+}

@@ -2,23 +2,23 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var VIEWS = { courses: 'v-courses', plan: 'v-plan', map: 'v-map', log: 'v-log', help: 'v-help', emergency: 'v-emergency' };
+  var VIEWS = { courses: 'v-courses', plan: 'v-plan', map: 'v-map', log: 'v-log', help: 'v-help', emergency: 'v-emergency', sheet: 'v-sheet' };
   var tab = 'courses', filter = 'all', prev = 'courses';
 
   function header() {
     var map = tab === 'map';
-    $('h-eyebrow').textContent = map ? $('h-eyebrow').dataset.course : (tab === 'emergency' ? '緊急時' : tab === 'help' ? 'はじめに' : (tab === 'log' ? '登った記録' : (tab === 'plan' ? '出発前の準備' : '計画と記録')));
-    $('h-title').textContent = map ? $('h-title').dataset.course : (tab === 'emergency' ? '現在地と連絡' : tab === 'help' ? '使い方と注意点' : '九州 山歩きメモ');
+    $('h-eyebrow').textContent = map ? $('h-eyebrow').dataset.course : (tab === 'sheet' ? '出発前の準備' : tab === 'emergency' ? '緊急時' : tab === 'help' ? 'はじめに' : (tab === 'log' ? '登った記録' : (tab === 'plan' ? '出発前の準備' : '計画と記録')));
+    $('h-title').textContent = map ? $('h-title').dataset.course : (tab === 'sheet' ? '登山計画書' : tab === 'emergency' ? '現在地と連絡' : tab === 'help' ? '使い方と注意点' : '九州 山歩きメモ');
     document.querySelector('.layers').hidden = !map;
     $('help-btn').hidden = tab === 'help' || tab === 'emergency';
     $('sos-btn').hidden = tab === 'emergency';
   }
   function showTab(name) {
-    if (name !== 'help' && name !== 'emergency') prev = name;
+    if (name !== 'help' && name !== 'emergency' && name !== 'sheet') prev = name;
     tab = name;
     Object.keys(VIEWS).forEach(function (k) {
       $(VIEWS[k]).hidden = k !== name;
-      if ($('tab-' + k)) $('tab-' + k).setAttribute('aria-selected', k === name);
+      if ($('tab-' + k)) $('tab-' + k).setAttribute('aria-selected', k === name || (name === 'sheet' && k === 'plan'));
     });
     header();
     if (name === 'map' && window.yamaMap) { setTimeout(function () { window.yamaMap.invalidateSize(); $('fit').click(); }, 0); }
