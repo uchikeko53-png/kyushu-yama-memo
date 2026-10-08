@@ -21,6 +21,7 @@
       <div class="eyebrow" id="h-eyebrow">計画と記録</div>
       <h1 id="h-title">九州 山歩きメモ</h1>
     </div>
+    <button type="button" class="sosbtn" id="sos-btn" aria-label="緊急時の画面を開く">緊急</button>
     <button type="button" class="mini" id="help-btn" aria-label="使い方と注意点を開く">使い方と注意点</button>
     <div class="layers" role="group" aria-label="地図の種類">
       <button type="button" data-layer="std" aria-pressed="true">標準</button>
@@ -76,6 +77,7 @@
           <li>赤い線が、コースの目安です。ルートから約50m離れると、警告が出ます。道に迷ったかもしれないと思ったら、来た道を戻って、標識を確認してください。</li>
           <li>寒いと、スマホの電池が早く減ります。モバイルバッテリーと、機内モードの利用がおすすめです。</li>
           <li>圏外でも、GPSは使えます。保存した地図が表示されます。</li>
+          <li><b>けがや遭難など、困ったときは、画面右上の赤い「緊急」ボタンを押してください。</b>現在地の緯度経度と住所、119番・110番に電話するボタン、電話での伝え方が出ます。位置は、メッセージで家族や同行者に送れます。出発前に、一度開いて、目を通しておいてください。</li>
         </ul>
       </details>
 
@@ -124,6 +126,65 @@
       </details>
 
       <p class="small">地図: 国土地理院タイル / 登山道: &copy; OpenStreetMap contributors / 標高: 国土地理院 / 天気: Open-Meteo</p>
+    </section>
+  </div>
+
+  <div id="v-emergency" hidden>
+    <section class="panel sos">
+      <button type="button" class="mini" id="em-back">&larr; もどる</button>
+      <div class="callbox">
+        <p class="calltxt"><b>命に関わるとき、けが、動けないときは、まず電話してください。</b></p>
+        <div class="row calls">
+          <a class="callbtn" href="tel:119">119番に電話<span>救急・救助</span></a>
+          <a class="callbtn" href="tel:110">110番に電話<span>警察</span></a>
+        </div>
+        <p class="small">山の遭難・けがは、119番でも110番でも、受けた側が必要な機関につなぎます。迷ったら119番。海や海岸の事故は118番(海上保安庁)。押すと、スマホの確認画面が出ます。</p>
+      </div>
+
+      <h2>いまの位置</h2>
+      <div id="em-pos" class="posbox" aria-live="polite"><p class="small">調べています…</p></div>
+      <div class="row">
+        <button type="button" class="btn" id="em-share">位置を共有する</button>
+        <button type="button" class="btn ghost" id="em-copy">コピー</button>
+      </div>
+      <div class="row">
+        <button type="button" class="mini" id="em-again">もう一度調べる</button>
+        <a class="mini" id="em-map" href="#" target="_blank" rel="noopener" hidden>地図で確認</a>
+      </div>
+      <textarea id="em-text" class="emtext" readonly rows="7" aria-label="共有する文章"></textarea>
+      <p class="small" id="em-msg" aria-live="polite"></p>
+
+      <h2>電話での伝え方</h2>
+      <ol class="steps">
+        <li>落ち着いて、安全な場所にいるかを確かめます。崖や落石の危険があるときは、無理に動かず、そのままで電話します。</li>
+        <li>電話をかけて、最初に、<b>「山で、けが(または道に迷った)です」</b>と言います。</li>
+        <li>次の順に伝えます。
+          <ul>
+            <li>場所: 山の名前、上の「住所」と「緯度経度」、近くの目印(標識・分岐・施設)</li>
+            <li>人数と、けがの様子(意識があるか、歩けるか、出血や痛み)</li>
+            <li>自分の携帯電話の番号(折り返しのため)</li>
+            <li>持っているもの(水、食料、防寒具、ライト)</li>
+          </ul></li>
+        <li>電話は、相手が切るまで切りません。折り返しを受けられるよう、電源とマナーモードの解除を確かめ、画面を暗くして電池を節約します。</li>
+        <li>家族や同行者にも、上の「位置を共有する」で、場所を知らせます。</li>
+      </ol>
+
+      <h2>電話がつながらないとき</h2>
+      <ul class="steps2">
+        <li>圏外でも、緊急通報(110・119・118)は、他の通信会社の電波があれば、つながることがあります。まず発信してみます。</li>
+        <li>安全な範囲で、尾根や見晴らしのよい場所など、電波の届きやすい所へ移ります。同行者がいれば、1人が電波のある所へ行きます。</li>
+        <li>圏外でも、<b>位置の緯度経度は、GPSで出せます。</b>画面のスクリーンショットを撮り、電波が戻ったら、すぐ伝えます。</li>
+        <li>通信できないと、住所は出ません。緯度経度と、近くの目印を伝えてください。</li>
+      </ul>
+
+      <h2>助けを待つ間</h2>
+      <ul class="steps2">
+        <li>動けないときは、むやみに動かず、目立つ場所で待ちます。</li>
+        <li>笛は、1分間に6回(約10秒おき)吹いて、1分休みます。夜は、ライトを同じように点滅させます。</li>
+        <li>レインウェア、防寒着、ビニール袋などで、体温を守ります。水と食料は、少しずつ取ります。</li>
+        <li>電波が全くないときは、機内モードで電池を節約し、決めた時間(例: 15分ごと)だけ解除して、発信を試します。</li>
+      </ul>
+      <p class="small">この画面は、いざというときに迷わないよう、出発前に一度、目を通しておいてください。位置は、スマホのGPSで調べた目安で、数十mずれることがあります。</p>
     </section>
   </div>
 
@@ -238,6 +299,8 @@
 <script src="track.js"></script>
 <script src="log.js"></script>
 <script src="plan.js"></script>
+<script src="munis.js"></script>
+<script src="emergency.js"></script>
 <script src="nav.js"></script>
 </body>
 </html>

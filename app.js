@@ -164,6 +164,8 @@
   });
 
   window.yamaShowPos = showPos;
+  window.yamaLast = function () { return lastPos; };
+  window.yamaNearest = function (lat, lon) { var n = nearest(lat, lon); return { d: n.d, m: n.m, course: C }; };
   window.Yama.onCourse(load);
   load(window.Yama.course);
 })();

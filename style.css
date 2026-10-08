@@ -153,3 +153,26 @@ summary{cursor:pointer;color:var(--mute)}
 .bk{border-left:4px solid var(--mute);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:13px;display:flex;flex-direction:column;gap:8px;background:var(--paper)}
 .bk.warn{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}
 .bk.ok{border-color:var(--ok)}
+
+/* 緊急 */
+.sosbtn{background:var(--trail);color:#fff;border:0;border-radius:8px;padding:6px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.sosbtn:focus-visible{outline:3px solid var(--pos);outline-offset:2px}
+.sos h2{margin:20px 0 8px}
+.callbox{border:2px solid var(--trail);border-radius:12px;padding:12px;margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.callbox p{margin:0}
+.calls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.callbtn{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--trail);color:#fff;border-radius:12px;padding:16px 8px;font-size:18px;font-weight:700;text-decoration:none;text-align:center}
+.callbtn span{font-size:12px;font-weight:400}
+.callbtn:focus-visible{outline:3px solid var(--pos);outline-offset:2px}
+.posbox{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--paper);display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.posbox .coord{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.35;overflow-wrap:anywhere}
+.posbox .kv{font-size:13px}
+.posbox .kv b{display:inline-block;min-width:6.5em;color:var(--mute);font-weight:500}
+.posbox.stale{border-color:var(--warn)}
+.emtext{width:100%;font:inherit;font-size:12px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:10px;resize:vertical}
+.steps,.steps2{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.steps ul{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px;font-size:13px}
+a.mini{text-decoration:none;display:inline-block}
+
+.sos .row{margin-top:8px}
+.sos .callbox .row{margin-top:0}

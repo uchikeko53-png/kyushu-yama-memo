@@ -2,18 +2,19 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var VIEWS = { courses: 'v-courses', plan: 'v-plan', map: 'v-map', log: 'v-log', help: 'v-help' };
+  var VIEWS = { courses: 'v-courses', plan: 'v-plan', map: 'v-map', log: 'v-log', help: 'v-help', emergency: 'v-emergency' };
   var tab = 'courses', filter = 'all', prev = 'courses';
 
   function header() {
     var map = tab === 'map';
-    $('h-eyebrow').textContent = map ? $('h-eyebrow').dataset.course : (tab === 'help' ? 'はじめに' : (tab === 'log' ? '登った記録' : (tab === 'plan' ? '出発前の準備' : '計画と記録')));
-    $('h-title').textContent = map ? $('h-title').dataset.course : (tab === 'help' ? '使い方と注意点' : '九州 山歩きメモ');
+    $('h-eyebrow').textContent = map ? $('h-eyebrow').dataset.course : (tab === 'emergency' ? '緊急時' : tab === 'help' ? 'はじめに' : (tab === 'log' ? '登った記録' : (tab === 'plan' ? '出発前の準備' : '計画と記録')));
+    $('h-title').textContent = map ? $('h-title').dataset.course : (tab === 'emergency' ? '現在地と連絡' : tab === 'help' ? '使い方と注意点' : '九州 山歩きメモ');
     document.querySelector('.layers').hidden = !map;
-    $('help-btn').hidden = tab === 'help';
+    $('help-btn').hidden = tab === 'help' || tab === 'emergency';
+    $('sos-btn').hidden = tab === 'emergency';
   }
   function showTab(name) {
-    if (name !== 'help') prev = name;
+    if (name !== 'help' && name !== 'emergency') prev = name;
     tab = name;
     Object.keys(VIEWS).forEach(function (k) {
       $(VIEWS[k]).hidden = k !== name;
@@ -29,6 +30,8 @@
   Object.keys(VIEWS).forEach(function (k) { if ($('tab-' + k)) $('tab-' + k).addEventListener('click', function () { showTab(k); }); });
   $('help-btn').addEventListener('click', function () { showTab('help'); });
   $('help-back').addEventListener('click', function () { showTab(prev); });
+  $('sos-btn').addEventListener('click', function () { showTab('emergency'); });
+  $('em-back').addEventListener('click', function () { showTab(prev); });
   window.addEventListener('yama:header', header);
 
   // ---- コース一覧
