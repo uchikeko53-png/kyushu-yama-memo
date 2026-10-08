@@ -140,3 +140,11 @@ summary{cursor:pointer;color:var(--mute)}
 .lbbar{display:flex;align-items:center;gap:14px;color:#fff;font-variant-numeric:tabular-nums}
 .lbbar .btn{width:auto;padding:8px 16px;color:#fff;border-color:#fff}
 .lbbar .btn:disabled{opacity:.35}
+
+/* 使い方 */
+.help .lead{margin:12px 0;color:var(--ink)}
+.help details{border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-top:10px;background:var(--card)}
+.help summary{padding:12px 0;font-weight:700;cursor:pointer;color:var(--ink)}
+.help ul{margin:0 0 12px;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.help ul.warn{border-left:4px solid var(--warn);padding-left:24px;background:color-mix(in srgb,var(--warn) 8%,transparent);padding-block:8px;margin-bottom:12px}
+#help-btn{white-space:nowrap}
