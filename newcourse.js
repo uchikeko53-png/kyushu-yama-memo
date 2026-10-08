@@ -6,7 +6,7 @@
   var root = $('v-newcourse');
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
-  var st = { th: null, top: null, draw: [], route: null, mode: 'th', source: '', run: 0 };
+  var st = { th: null, top: null, draw: [], route: null, mode: 'th', source: '', run: 0, draftId: null };
   var map = null, thM = null, topM = null, drawLine = null, routeLine = null, status, saveBtn;
 
   // ---- 座標の読み取り(Googleマップの「35.123, 139.456」や、度分秒の形)
@@ -39,6 +39,9 @@
     kl.appendChild(ks); form.appendChild(kl);
     field('山頂・折り返し地点の名前', 'nc-top', '山頂');
     sec.appendChild(form);
+    var memo = el('button', 'btn ghost', '名前だけ、先に仮保存する'); memo.type = 'button'; memo.id = 'nc-memo'; memo.style.marginTop = '10px'; sec.appendChild(memo);
+    sec.appendChild(el('p', 'small', 'コース名だけで、仮のコースとして残せます。ルートは、あとで、一覧の「ルートをつくる」から作れます。'));
+    var dn = el('p', 'small'); dn.id = 'nc-draftnote'; dn.hidden = true; sec.appendChild(dn);
 
     sec.appendChild(el('h2', null, '1. 場所を選ぶ'));
     var modes = el('div', 'row modes');
@@ -79,6 +82,7 @@
     $('nc-clear').addEventListener('click', function () { st.th = st.top = null; st.draw = []; st.route = null; setMode('th'); changed(); say('登山口と山頂を、地図で選んでください。'); });
     $('nc-kind').addEventListener('change', function () { changed(); });
     saveBtn.addEventListener('click', save);
+    memo.addEventListener('click', saveMemo);
   }
 
   function say(msg, cls) { status.className = 'status' + (cls ? ' ' + cls : ''); status.textContent = msg; }
@@ -174,14 +178,24 @@
       if (my !== st.run) return; finish(route, 'manual', '');
     }).catch(function (e) { say(ERR[e.message] || '標高を取得できませんでした。', 'warn'); }).then(function () { $('nc-manual').disabled = false; });
   }
+  function saveMemo() {
+    var name = $('nc-name').value.trim();
+    if (!name) { say('コース名を入れてください。', 'warn'); $('nc-name').focus(); return; }
+    var area = $('nc-area').value.trim(), ok;
+    if (st.draftId) ok = window.Custom.update(st.draftId, { name: name, area: area });
+    else ok = window.Custom.add({ id: 'c' + Date.now().toString(36), name: name, area: area, provisional: true, source: 'memo', createdAt: Date.now(), note: '名前だけの仮登録です。ルートは、あとで作ります。' });
+    if (!ok) { say('保存できませんでした。端末の空き容量や、ブラウザの設定を確認してください。', 'warn'); return; }
+    say('仮のコースとして、名前を保存しました。コース一覧に、追加します…', 'ok');
+    setTimeout(function () { location.reload(); }, 800);
+  }
   function save() {
     var name = $('nc-name').value.trim();
     if (!name) { say('コース名を入れてください。', 'warn'); $('nc-name').focus(); return; }
     if (!st.route) { say('先に、ルートをつくってください。', 'warn'); return; }
-    var id = 'c' + Date.now().toString(36);
+    var id = st.draftId || ('c' + Date.now().toString(36));
     var c = { id: id, name: name, area: $('nc-area').value.trim(), provisional: true, source: st.source, createdAt: Date.now(),
       note: (st.source === 'auto' ? 'OpenStreetMap の道から自動で作った、仮のルートです。' : '手で引いた、仮のルートです。') + '現地で確認してください。', route: st.route };
-    if (!window.Custom.add(c)) { say('保存できませんでした。端末の空き容量や、ブラウザの設定を確認してください。', 'warn'); return; }
+    if (!(st.draftId ? window.Custom.update(id, c) : window.Custom.add(c))) { say('保存できませんでした。端末の空き容量や、ブラウザの設定を確認してください。', 'warn'); return; }
     try { localStorage.setItem('yama-course', id); } catch (e) {}
     say('仮のコースを保存しました。コース一覧に、追加します…', 'ok'); saveBtn.disabled = true;
     setTimeout(function () { location.reload(); }, 900);
@@ -209,7 +223,13 @@
   build();
   window.addEventListener('yama:tab', function (e) {
     if (e.detail !== 'newcourse') return;
-    initMap(); setMode(st.mode); changed();
+    initMap(); setMode(st.mode);
+    var d = window.NC_DRAFT; window.NC_DRAFT = null;
+    st.draftId = d ? d.id : null;
+    var note = $('nc-draftnote');
+    if (d) { $('nc-name').value = d.name; $('nc-area').value = d.area || ''; note.textContent = '「' + d.name + '」のルートを作ります。保存すると、この仮のコースに、ルートが入ります。'; note.hidden = false; }
+    else note.hidden = true;
+    changed();
     setTimeout(function () { map.invalidateSize(); }, 50);
   });
 })();

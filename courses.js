@@ -41,7 +41,9 @@
     update: function (id, patch) { var a = cload(); a.forEach(function (c) { if (c.id === id) Object.assign(c, patch); }); return csave(a); },
     remove: function (id) { return csave(cload().filter(function (c) { return c.id !== id; })); }
   };
+  window.DRAFTS = []; // 名前だけの仮登録(ルートは、あとで作る)
   cload().forEach(function (c) {
+    if (c && c.id && !c.route && typeof c.name === 'string' && !window.ROUTES[c.id]) { window.DRAFTS.push({ id: c.id, name: c.name, area: String(c.area || ''), note: String(c.note || ''), custom: true, provisional: true, draft: true }); return; }
     var r = c && c.route;
     if (!c || !c.id || !r || !Array.isArray(r.points) || r.points.length < 2 || !Array.isArray(r.line) || r.line.length < 2 || !Array.isArray(r.marks) || !(r.total > 0)) return;
     if (window.ROUTES[c.id]) return; // 標準のコースと、IDが重なったものは使わない

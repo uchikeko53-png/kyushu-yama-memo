@@ -67,7 +67,7 @@
   }
   function draw() {
     var plans = window.Yama.plans(), box = $('cs-list'); box.innerHTML = '';
-    var rows = window.COURSES.map(function (c) {
+    var rows = window.COURSES.concat(window.DRAFTS || []).map(function (c) {
       var mine = recs.filter(function (r) { return r.courseId === c.id; });
       return { c: c, plan: plans[c.id] || null, n: mine.length, last: mine.length ? mine[0].date : '' };
     }).filter(function (x) {
@@ -88,10 +88,11 @@
       el.innerHTML = '<div><h3></h3><div class="area"></div></div><div class="stat"></div><div class="small cnote" hidden></div><div class="chips"></div>' +
         '<div class="cplan"><label>状態 <select aria-label="状態"><option value="">未設定</option><option value="idea">気になる</option><option value="planned">計画中</option></select></label>' +
         '<label class="pd" hidden>予定日 <input type="date" aria-label="予定日"></label></div>' +
-        '<div class="row"><button type="button" class="btn pb">計画(天気・持ち物)</button><button type="button" class="btn ghost mb">地図を開く</button></div>';
+        (c.draft ? '<div class="row"><button type="button" class="btn mk">ルートをつくる(地図で選ぶ)</button></div>'
+                 : '<div class="row"><button type="button" class="btn pb">計画(天気・持ち物)</button><button type="button" class="btn ghost mb">地図を開く</button></div>');
       el.querySelector('h3').textContent = c.name;
-      el.querySelector('.area').textContent = c.area + ' ・ ' + c.kind + 'コース';
-      el.querySelector('.stat').textContent = window.statLine(c.stats);
+      el.querySelector('.area').textContent = c.draft ? (c.area ? c.area + ' ・ ' : '') + 'ルート未設定' : c.area + ' ・ ' + c.kind + 'コース';
+      el.querySelector('.stat').textContent = c.draft ? '名前だけの仮登録です。ルートは、まだありません。' : window.statLine(c.stats);
       el.querySelector('.chips').innerHTML = chips;
       var nt = el.querySelector('.cnote'); if (c.note) { nt.textContent = c.note; nt.hidden = false; }
       var sel = el.querySelector('select'), pd = el.querySelector('.pd'), di = el.querySelector('input');
@@ -105,15 +106,18 @@
       if (c.custom) {
         var act = document.createElement('div'); act.className = 'row'; el.appendChild(act);
         function mini(t, cls, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'mini' + (cls ? ' ' + cls : ''); b.textContent = t; b.addEventListener('click', fn); act.appendChild(b); return b; }
-        if (c.provisional) mini('仮を外す(確定)', '', function () { window.Custom.update(c.id, { provisional: false, note: '' }); location.reload(); });
+        if (c.provisional && !c.draft) mini('仮を外す(確定)', '', function () { window.Custom.update(c.id, { provisional: false, note: '' }); location.reload(); });
         mini('名前を直す', '', function () { var nm = window.prompt('コース名', c.name); if (nm && nm.trim()) { window.Custom.update(c.id, { name: nm.trim() }); location.reload(); } });
         var del = mini('削除', 'danger', function () {
           if (del.dataset.ok) { window.Custom.remove(c.id); try { if (localStorage.getItem('yama-course') === c.id) localStorage.removeItem('yama-course'); } catch (e) {} location.reload(); return; }
           del.dataset.ok = '1'; del.textContent = 'もう一度押すと削除'; setTimeout(function () { delete del.dataset.ok; del.textContent = '削除'; }, 4000);
         });
       }
-      el.querySelector('.mb').addEventListener('click', function () { window.Yama.select(c.id); showTab('map'); });
-      el.querySelector('.pb').addEventListener('click', function () { window.Yama.select(c.id); showTab('plan'); });
+      if (c.draft) el.querySelector('.mk').addEventListener('click', function () { window.NC_DRAFT = c; showTab('newcourse'); });
+      else {
+        el.querySelector('.mb').addEventListener('click', function () { window.Yama.select(c.id); showTab('map'); });
+        el.querySelector('.pb').addEventListener('click', function () { window.Yama.select(c.id); showTab('plan'); });
+      }
       box.appendChild(el);
     });
   }
@@ -125,7 +129,7 @@
     });
   });
   window.addEventListener('yama:records', renderCourses);
-  $('nc-open').addEventListener('click', function () { showTab('newcourse'); });
+  $('nc-open').addEventListener('click', function () { window.NC_DRAFT = null; showTab('newcourse'); });
   $('cio-export').addEventListener('click', function () { var n = window.CourseIO.exportCourses(); $('cio-msg').textContent = n ? n + '件の仮のコースを、書き出しました。' : '書き出す、自分で登録したコースがありません。'; });
   $('cio-import').addEventListener('change', function () {
     var f = this.files[0], inp = this; if (!f) return;

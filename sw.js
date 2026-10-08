@@ -1,5 +1,5 @@
 // アプリ本体と、保存した地図タイルを端末に持たせるための Service Worker
-var APP = 'yama-app-v21';
+var APP = 'yama-app-v22';
 var TILES = 'yama-tiles-v1';
 var SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'index.html', 'style.css', 'app.js', 'offline.js', 'db.js', 'courses.js', 'log.js', 'routes.js', 'nav.js', 'track.js', 'plan.js', 'routing.js', 'newcourse.js', 'sheet.js', 'munis.js', 'emergency.js',
   'lib/leaflet.min.js', 'lib/leaflet.min.css',
