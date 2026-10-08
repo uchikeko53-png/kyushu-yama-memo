@@ -104,16 +104,13 @@
     <section class="panel">
       <form id="log-form" class="logform">
         <h2 id="lf-title" style="margin:0">山行を記録する</h2>
-        <div class="two">
-          <label>日付<input type="date" id="lf-date" required></label>
-          <label>書いた人<input type="text" id="lf-who" maxlength="20" placeholder="名前" required></label>
-        </div>
+        <label>日付<input type="date" id="lf-date" required></label>
         <label>コース<select id="lf-course"></select></label>
         <div id="lf-stat" class="statbox" aria-live="polite"></div>
         <label>山名<input type="text" id="lf-mt" maxlength="40" required></label>
         <label>歩いた軌跡(任意)<select id="lf-track"><option value="">添付しない</option></select></label>
         <label>ひとこと<textarea id="lf-text" maxlength="1000" placeholder="天気、きつかった所、よかった景色など" required></textarea></label>
-        <label>写真(3枚まで)<input type="file" id="lf-photos" accept="image/*" multiple></label>
+        <label>写真(10枚まで)<input type="file" id="lf-photos" accept="image/*" multiple></label>
         <div id="lf-prev" class="prev"></div>
         <div class="row">
           <button class="btn" type="submit" id="lf-submit">記録を保存</button>
@@ -142,7 +139,7 @@
     <button type="button" role="tab" id="tab-log" aria-selected="false">記録</button>
   </nav>
 
-  <div id="lightbox" hidden><img alt=""><button type="button" class="btn ghost" id="lb-close">閉じる</button></div>
+  <div id="lightbox" hidden><img alt=""><div class="lbbar"><button type="button" class="btn ghost" id="lb-prev" aria-label="前の写真">前へ</button><span id="lb-n"></span><button type="button" class="btn ghost" id="lb-next" aria-label="次の写真">次へ</button></div><button type="button" class="btn ghost" id="lb-close">閉じる</button></div>
 </div>
 
 <script src="lib/leaflet.min.js"></script>

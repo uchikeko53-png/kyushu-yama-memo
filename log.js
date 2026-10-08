@@ -1,14 +1,13 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var MAX_PHOTOS = 3, MAX_SIDE = 1200;
+  var MAX_PHOTOS = 10, MAX_SIDE = 1200;
   var urls = [];            // 画面に出している写真のURL(作り直すときに解放する)
   var editing = null;       // 編集中の記録
   var picked = [];          // フォームで選んだ新しい写真(Blob)
 
   // ---- フォーム
   function today() { var d = new Date(), p = function (n) { return String(n).padStart(2, '0'); }; return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
-  try { $('lf-who').value = localStorage.getItem('yama-who') || ''; } catch (e) {}
   $('lf-date').value = today();
 
   // ---- コース選択(距離・標高などは自動で入る)
@@ -56,7 +55,6 @@
   function resetForm() {
     editing = null; picked = [];
     $('log-form').reset(); $('lf-date').value = today(); sel.value = window.Yama.course.id; courseChanged(false);
-    try { $('lf-who').value = localStorage.getItem('yama-who') || ''; } catch (e) {}
     delete $('lf-track').dataset.keep;
     $('lf-prev').innerHTML = ''; $('lf-title').textContent = '山行を記録する';
     $('lf-submit').textContent = '記録を保存'; $('lf-cancel').hidden = true;
@@ -65,10 +63,8 @@
 
   $('log-form').addEventListener('submit', function (ev) {
     ev.preventDefault();
-    var who = $('lf-who').value.trim();
-    try { localStorage.setItem('yama-who', who); } catch (e) {}
     var rec = editing ? Object.assign({}, editing) : { id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), photos: [] };
-    rec.date = $('lf-date').value; rec.who = who; rec.mountain = $('lf-mt').value.trim(); rec.text = $('lf-text').value.trim();
+    rec.date = $('lf-date').value; rec.who = rec.who || ''; rec.mountain = $('lf-mt').value.trim(); rec.text = $('lf-text').value.trim();
     var c = window.courseById(sel.value);
     rec.courseId = c ? c.id : '';
     var tid = $('lf-track').value;
@@ -97,15 +93,16 @@
       if (!list.length) { box.innerHTML = '<p class="empty">まだ記録がありません。登ったら、上のフォームから書いてみましょう。</p>'; return; }
       list.forEach(function (r) {
         var el = document.createElement('article'); el.className = 'entry';
-        var ph = document.createElement('div'); ph.className = 'ph';
+        var ph = document.createElement('div'); ph.className = 'ph'; ph.dataset.n = Math.min((r.photos || []).length, 3);
+        var mine = [];
         (r.photos || []).forEach(function (b, i) {
-          var u = URL.createObjectURL(b); urls.push(u);
+          var u = URL.createObjectURL(b); urls.push(u); mine.push(u);
           var im = document.createElement('img'); im.src = u; im.alt = r.mountain + 'の写真' + (i + 1); im.loading = 'lazy';
-          im.addEventListener('click', function () { $('lightbox').querySelector('img').src = u; $('lightbox').hidden = false; });
+          im.addEventListener('click', function () { openLB(mine, i); });
           ph.appendChild(im);
         });
         var body = document.createElement('div'); body.className = 'body';
-        var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = fmt(r.date) + ' ・ ' + r.who;
+        var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = fmt(r.date) + (r.who ? ' ・ ' + r.who : '');
         var h = document.createElement('h3'); h.textContent = r.mountain;
         var st = document.createElement('div'); st.className = 'stat';
         if (r.stats && r.courseId) {
@@ -133,12 +130,17 @@
   }
   function edit(r) {
     editing = r; picked = [];
-    $('lf-date').value = r.date; $('lf-who').value = r.who; sel.value = window.courseById(r.courseId) ? r.courseId : ''; $('lf-mt').value = r.mountain; $('lf-text').value = r.text; courseChanged(true);
+    $('lf-date').value = r.date; sel.value = window.courseById(r.courseId) ? r.courseId : ''; $('lf-mt').value = r.mountain; $('lf-text').value = r.text; courseChanged(true);
     $('lf-prev').innerHTML = ''; $('lf-track').value = r.trackId || ''; if (r.walk && !$('lf-track').value) $('lf-track').dataset.keep = '1'; else delete $('lf-track').dataset.keep; $('lf-title').textContent = '記録を編集する';
     $('lf-submit').textContent = '更新する'; $('lf-cancel').hidden = false;
     $('lf-msg').textContent = r.photos && r.photos.length ? '写真は今のまま残ります。差し替えるときだけ、新しく選んでください。' : '';
     window.scrollTo(0, 0);
   }
+  var lb = { list: [], i: 0 };
+  function showLB() { $('lightbox').querySelector('img').src = lb.list[lb.i]; $('lb-n').textContent = (lb.i + 1) + ' / ' + lb.list.length; $('lb-prev').disabled = lb.i === 0; $('lb-next').disabled = lb.i === lb.list.length - 1; }
+  function openLB(list, i) { lb = { list: list, i: i }; showLB(); $('lightbox').hidden = false; }
+  $('lb-prev').addEventListener('click', function (e) { e.stopPropagation(); if (lb.i > 0) { lb.i--; showLB(); } });
+  $('lb-next').addEventListener('click', function (e) { e.stopPropagation(); if (lb.i < lb.list.length - 1) { lb.i++; showLB(); } });
   $('lb-close').addEventListener('click', function () { $('lightbox').hidden = true; });
   $('lightbox').addEventListener('click', function (e) { if (e.target === this) this.hidden = true; });
 
